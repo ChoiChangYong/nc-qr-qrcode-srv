@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 router.get('/qrcode', function(req, res, next) {
   const secret = req.app.get('jwt-secret');
   const qrcode = {
-    qrcode: 'https://172.19.148.83/login/qrcode/test'
+    qrcode: 'https://pingauth.page.link/qrlogin'
   }
 
   const tokenGenerator = (qrcode, callback) => {
@@ -17,7 +17,7 @@ router.get('/qrcode', function(req, res, next) {
       {
         algorithm: 'HS512',
         // expiresIn: 60 * 60 * 24 * 7
-        expiresIn: 15 // 15초
+        expiresIn: 30 // 30초
       }
     )
     callback(token)
@@ -35,12 +35,18 @@ router.get('/qrcode', function(req, res, next) {
 
 /* POST validate QR token (Auth Server -> this) */
 router.post('/qrcode-token/validation', function(req, res, next) {
-  const qr_token = req.body.qr_token;
+  console.log("=============req.body.qr_token=============");
+  console.log(req.body.qr_token);
+  console.log("==============================");
+
+  const token = {
+    qr_token: req.body.qr_token
+  }
   const secret = req.app.get('jwt-secret');
 
-  if(qr_token){
+  if(token.qr_token){
     try {
-      const decoded = jwt.verify(qr_token, secret);
+      const decoded = jwt.verify(token.qr_token, secret);
       console.log("/qrcode-token/validation (POST) : token is verify");
       console.log(decoded);
       res.json({
