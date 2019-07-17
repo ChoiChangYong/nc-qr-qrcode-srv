@@ -35,12 +35,18 @@ router.get('/qrcode', function(req, res, next) {
 
 /* POST validate QR token (Auth Server -> this) */
 router.post('/qrcode-token/validation', function(req, res, next) {
-  const qr_token = req.body.qr_token;
+  console.log("=============req.body.qr_token=============");
+  console.log(req.body.qr_token);
+  console.log("==============================");
+
+  const token = {
+    qr_token: req.body.qr_token
+  }
   const secret = req.app.get('jwt-secret');
 
-  if(qr_token){
+  if(token.qr_token){
     try {
-      const decoded = jwt.verify(qr_token, secret);
+      const decoded = jwt.verify(token.qr_token, secret);
       console.log("/qrcode-token/validation (POST) : token is verify");
       console.log(decoded);
       res.json({
