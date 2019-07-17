@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 router.get('/qrcode', function(req, res, next) {
   const secret = req.app.get('jwt-secret');
   const qrcode = {
-    qrcode: 'https://172.19.148.83/login/qrcode/test'
+    qrcode: 'https://pingauth.page.link/qrlogin'
   }
 
   const tokenGenerator = (qrcode, callback) => {
@@ -17,7 +17,7 @@ router.get('/qrcode', function(req, res, next) {
       {
         algorithm: 'HS512',
         // expiresIn: 60 * 60 * 24 * 7
-        expiresIn: 15 // 15초
+        expiresIn: 30 // 30초
       }
     )
     callback(token)
