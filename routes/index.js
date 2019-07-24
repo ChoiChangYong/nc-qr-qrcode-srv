@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken');
 router.get('/qrcode', function(req, res, next) {
   const secret = req.app.get('jwt-secret');
   const qrcode = {
-    qrcode: 'https://pingauth.page.link/qrlogin'
+    // qrcode: 'http://pingauth.com/qrlogin'
+    qrcode: 'https://pingauth.page.link/?link=http%3A%2F%2Fpingauth.com%2Fqrlogin'
   }
 
   const tokenGenerator = (qrcode, callback) => {
@@ -28,7 +29,7 @@ router.get('/qrcode', function(req, res, next) {
     
     res.json({
       result: 1,
-      qrcode: qrcode.qrcode+'?qr_token='+qr_token
+      qrcode: qrcode.qrcode+'%3Fqr_token%3D'+qr_token+'&apn=com.example.qrcodelogin'
     });
   });
 });
