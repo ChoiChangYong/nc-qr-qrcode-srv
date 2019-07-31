@@ -1,16 +1,22 @@
 var Qrcode = require('../services').Qrcode;
-var Token = require('../services').Token;
+var Session = require('../services').Session;
 
 /**
  * QR코드 생성
  */
 exports.createQrcode = (req, res, next) => {
-    const secret = req.app.get('jwt-secret');
-    Qrcode.create((url) => {
-        Token.create(url, secret, (callback) => {
+    const request = {
+        instanceId: req.params.instanceId
+    }
+
+    Qrcode.createQRString((url) => {
+        // QR코드 세션 생성
+        req.session.instanceId = request.instanceId;
+        console.log(req.session);
+        req.session.save(() => {
             res.json({
                 result: 1,
-                qrcode: callback.url+'%3Fqr_token%3D'+callback.token+'&apn=com.example.qrcodelogin'
+                qrcode: url+'%3Fkey%3D'+req.sessionID+'&apn=com.example.qrcodelogin'
             });
         });
     });
@@ -19,21 +25,40 @@ exports.createQrcode = (req, res, next) => {
 /**
  * QR코드 토큰 검증
  */
-exports.checkQrcodeToken = (req, res, next) => {
-    const secret = req.app.get('jwt-secret');
+exports.verifyQrcodeSession = (req, res, next) => {
     const request = {
-        token: req.body.qr_token
+        qrcodeSessionID: req.body.qrcodeSessionID
     }
-    if(request.token){
-        Token.validate(request.token, secret, (callback) => {
-            if(callback){
-                res.json({result: 1});
+
+    if(request.qrcodeSessionID){
+        Session.verifyQrcodeSession(request.qrcodeSessionID, (callback) => {
+            if(callback!=null){
+                res.json({result: 1, qrcodeSession: callback});
             } else {
-                res.json({result: 0});
+                res.json({result: 0, message: "세션이 만료되었습니다.\n다시 로그인해주세요!"});
             }
         });
     } else {
-        console.log("/qrcode-token/validation (POST) : no token");
-        res.json({result: 0});
+        res.json({result: 0, message: "로그인 정보가 존재하지 않습니다."});
+    }
+};
+
+/**
+ * 유저 세션 삭제
+ */
+exports.deleteQrcodeSession = (req, res, next) => {
+    const request = {
+        sessionID: req.params.sessionID
+    }
+
+    if(request.sessionID){
+        Session.deleteSession(request.sessionID, (callback) => {
+            if(callback==1)
+                res.json({result: 1, message: "세션 삭제 성공"});
+            else
+                res.json({result: 0, message: "세션 삭제 실패! 삭제된 row 개수:"+callback});
+        });
+    } else {
+        res.json({result: 0, message: "유저 세션이 존재하지 않습니다."});
     }
 };

@@ -3,9 +3,12 @@ var router = express.Router();
 var qrlogin = require('../controllers/qrlogin');
 
 /* GET QR-Code */
-router.get('/qrcode', qrlogin.createQrcode);
+router.get('/qrcode/:instanceId', qrlogin.createQrcode);
 
 /* POST validate QR token (Auth Server -> this) */
-router.post('/qrcode-token/validation', qrlogin.checkQrcodeToken);
+router.post('/session/verification', qrlogin.verifyQrcodeSession);
+
+/* DELETE QR-Code session (Web Server -> this) */
+router.delete('/sessions/:sessionID', qrlogin.deleteQrcodeSession);
 
 module.exports = router;
