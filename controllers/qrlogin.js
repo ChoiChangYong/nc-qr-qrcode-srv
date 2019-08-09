@@ -12,7 +12,6 @@ exports.createQrcode = async (req, res, next) => {
     const createQRStringResult = await Qrcode.createQRString();
     // QR코드 세션 생성
     req.session.instanceId = request.instanceId;
-    console.log(req.session);
     req.session.save(() => {
         res.json({
             result: 1,
@@ -30,7 +29,7 @@ exports.verifyQrcodeSession = async (req, res, next) => {
     }
     
     if(!request.qrcodeSessionID){
-        return res.json({result: 0, message: "로그인 정보가 존재하지 않습니다."});
+        return res.json({result: 0, message: "QR코드 세션이 존재하지 않습니다."});
     }
 
     const verifyQrcodeSessionResult = await Session.verifyQrcodeSession(request.qrcodeSessionID);
@@ -43,7 +42,7 @@ exports.verifyQrcodeSession = async (req, res, next) => {
 };
 
 /**
- * 유저 세션 삭제
+ * QR코드 세션 삭제
  */
 exports.deleteQrcodeSession = async (req, res, next) => {
     const request = {
@@ -51,14 +50,16 @@ exports.deleteQrcodeSession = async (req, res, next) => {
     }
 
     if(!request.sessionID){
-        return res.json({result: 0, message: "유저 세션이 존재하지 않습니다."});
+        return res.json({result: 0, message: "QR코드 세션이 존재하지 않습니다."});
     } 
 
     const deleteSessionResult = await Session.deleteSession(request.sessionID);
     
-    if(deleteSessionResult!=1){
+    if(deleteSessionResult==0){
+        return res.json({result: 1, message: "QR코드 세션이 존재하지 않습니다."});
+    } else if(deleteSessionResult!=1){
         return res.json({result: 0, message: "세션 삭제 실패! 삭제된 row 개수:"+deleteSessionResult});
     }
-    
+
     res.json({result: 1, message: "세션 삭제 성공"});
 };
